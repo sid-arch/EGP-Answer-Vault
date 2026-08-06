@@ -1,9 +1,214 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#011023"><title>EGP Knowledge Hub</title><link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="styles.css"></head><body>
-<header class="app-header"><div class="brand"><img class="brand-logo" src="assets/logo.png" alt="EGP"><div><p class="brand-kicker">Euler's Golden Pie</p><h1>Knowledge Hub</h1></div></div><div class="header-actions"><div id="syncStatus" class="sync-status setup"><span class="sync-dot"></span><span id="syncStatusText">Setup required</span></div><button id="presentationBtn" class="text-icon-button">Presentation</button><button id="refreshBtn" class="icon-button" title="Refresh"><img src="assets/icons/refresh-cw-alt-3-svgrepo-com.svg" alt=""></button><button id="settingsBtn" class="icon-button" title="Settings"><img src="assets/icons/settings-minimalistic-svgrepo-com.svg" alt=""></button></div></header>
-<main class="app-shell"><section class="hero-panel"><div><p class="section-kicker">Internal EGP intelligence system</p><h2>Every tough question. One polished answer.</h2><p>Search, prioritize, prepare, and stay consistent across every EGP conversation.</p></div><button id="newQuestionBtn" class="primary-button"><img src="assets/icons/plus-svgrepo-com.svg" alt="">New Question</button></section>
-<section class="toolbar"><label class="search-box"><img src="assets/icons/search-svgrepo-com.svg" alt=""><input id="searchInput" type="search" placeholder="Search questions, answers, follow-ups, tags..."></label><select id="categoryFilter"><option value="all">All categories</option></select><select id="priorityFilter"><option value="all">All priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select><select id="sortSelect"><option value="priority">Priority</option><option value="updated">Recently updated</option><option value="created">Recently added</option><option value="alphabetical">Alphabetical</option><option value="category">Category</option><option value="followups">Most follow-ups</option></select></section>
-<section class="summary-row"><div><strong id="questionCount">0</strong><span>Questions</span></div><div><strong id="followupCount">0</strong><span>Follow-ups</span></div><div><strong id="criticalCount">0</strong><span>Critical</span></div><div><strong id="highCount">0</strong><span>High</span></div><div><strong id="lastSyncedText">Never</strong><span>Last synced</span></div></section>
-<section id="loadingState" class="state-card hidden"><div class="spinner"></div><h3>Loading the shared vault</h3></section><section id="emptyState" class="state-card hidden"><div class="empty-symbol">?</div><h3>No questions found</h3></section><section id="questionList" class="question-list"></section></main>
-<dialog id="questionDialog" class="dialog-shell"><form id="questionForm" class="dialog-card"><div class="dialog-header"><div><p class="section-kicker">Knowledge entry</p><h3 id="questionDialogTitle">New Question</h3></div><button class="close-button" type="button" data-close="questionDialog">×</button></div><input id="entryId" type="hidden"><div class="field-grid"><label class="field"><span>Category</span><input id="categoryField" placeholder="Memory"></label><label class="field"><span>Priority</span><select id="priorityField"><option>Critical</option><option selected>High</option><option>Medium</option><option>Low</option></select></label></div><label class="field"><span>Question</span><textarea id="questionField" rows="3" required></textarea></label><label class="field"><span>Answer</span><textarea id="answerField" rows="7" required></textarea></label><label class="field"><span>Tags</span><input id="tagsField" placeholder="working memory, parents, pilot"></label><label class="field"><span>Internal notes</span><textarea id="notesField" rows="3" placeholder="Private coaching notes; not shown in presentation mode"></textarea></label><div class="followup-editor"><div class="followup-editor-header"><div><span class="field-heading">Prospective follow-ups</span><p>Add likely next questions and prepared answers.</p></div><button id="addFollowupBtn" class="secondary-button" type="button"><img src="assets/icons/plus-svgrepo-com.svg" alt="">Add Follow-up</button></div><div id="followupFields" class="followup-fields"></div></div><div class="dialog-actions"><button class="text-button" type="button" data-close="questionDialog">Cancel</button><button id="saveQuestionBtn" class="primary-button" type="submit">Save Question</button></div></form></dialog>
-<dialog id="settingsDialog" class="dialog-shell"><form id="settingsForm" class="dialog-card compact-dialog"><div class="dialog-header"><div><p class="section-kicker">Connection</p><h3>Google Sheets Settings</h3></div><button class="close-button" type="button" data-close="settingsDialog">×</button></div><label class="field"><span>Apps Script URL</span><input id="scriptUrlField" type="url"></label><label class="field"><span>Private access key</span><input id="accessKeyField" type="password"></label><label class="field"><span>Auto-refresh</span><select id="autoRefreshField"><option value="0">Off</option><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="300">5 minutes</option></select></label><div class="dialog-actions split-actions"><button id="disconnectBtn" class="danger-text-button" type="button">Disconnect</button><div><button class="text-button" type="button" data-close="settingsDialog">Cancel</button><button class="primary-button" type="submit">Save & Connect</button></div></div></form></dialog>
-<dialog id="copyDialog" class="copy-dialog"><div class="copy-menu"><button data-copy-mode="answer">Copy answer</button><button data-copy-mode="qa">Copy question + answer</button><button data-copy-mode="thread">Copy entire thread</button></div></dialog><div id="toast" class="toast"></div><script src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#011023" />
+  <meta name="description" content="Internal EGP question and answer knowledge hub." />
+  <title>EGP Knowledge Hub</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="EGP Knowledge Hub home">
+        <img class="brand-logo" src="assets/logo.png" alt="EGP" onerror="this.classList.add('missing')" />
+        <div class="brand-copy">
+          <span class="brand-kicker">Euler's Golden Pie</span>
+          <strong>Knowledge Hub</strong>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <div id="syncStatus" class="sync-status setup" role="status" aria-live="polite">
+          <span class="sync-dot"></span>
+          <span id="syncStatusText">Setup required</span>
+        </div>
+        <button id="presentationBtn" class="header-text-button" type="button">Presentation</button>
+        <button id="refreshBtn" class="icon-button" type="button" aria-label="Refresh from Google Sheets" title="Refresh">
+          <img src="assets/icons/refresh-cw-alt-3-svgrepo-com.svg" alt="" />
+        </button>
+        <button id="settingsBtn" class="icon-button" type="button" aria-label="Open settings" title="Settings">
+          <img src="assets/icons/settings-minimalistic-svgrepo-com.svg" alt="" />
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="section-kicker">Internal EGP intelligence system</p>
+        <h1>Every tough question.<br />One polished answer.</h1>
+        <p>Search, prioritize, prepare, and stay consistent across every EGP conversation.</p>
+      </div>
+      <button id="newQuestionBtn" class="primary-button" type="button">
+        <img src="assets/icons/plus-svgrepo-com.svg" alt="" />
+        <span>New Question</span>
+      </button>
+    </section>
+
+    <section class="control-panel" aria-label="Knowledge hub controls">
+      <label class="search-box">
+        <img src="assets/icons/search-svgrepo-com.svg" alt="" />
+        <input id="searchInput" type="search" placeholder="Search questions, answers, follow-ups, tags..." autocomplete="off" />
+      </label>
+      <select id="categoryFilter" aria-label="Filter by category">
+        <option value="all">All categories</option>
+      </select>
+      <select id="priorityFilter" aria-label="Filter by priority">
+        <option value="all">All priorities</option>
+        <option value="Critical">Critical</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <select id="sortSelect" aria-label="Sort questions">
+        <option value="priority">Priority</option>
+        <option value="updated">Recently updated</option>
+        <option value="created">Recently added</option>
+        <option value="alphabetical">Alphabetical</option>
+        <option value="category">Category</option>
+        <option value="followups">Most follow-ups</option>
+      </select>
+    </section>
+
+    <section class="summary-row" aria-label="Vault summary">
+      <div><strong id="questionCount">0</strong><span>Questions</span></div>
+      <div><strong id="followupCount">0</strong><span>Follow-ups</span></div>
+      <div><strong id="criticalCount">0</strong><span>Critical</span></div>
+      <div><strong id="highCount">0</strong><span>High</span></div>
+      <div><strong id="lastSyncedText">Never</strong><span>Last synced</span></div>
+    </section>
+
+    <section id="loadingState" class="state-card hidden">
+      <div class="spinner"></div>
+      <h3>Loading the shared vault</h3>
+      <p>Fetching the latest information from Google Sheets.</p>
+    </section>
+
+    <section id="emptyState" class="state-card hidden">
+      <div class="empty-symbol">?</div>
+      <h3>No questions found</h3>
+      <p>Add a question or adjust your filters.</p>
+    </section>
+
+    <section id="questionList" class="question-list" aria-live="polite"></section>
+  </main>
+
+  <dialog id="questionDialog" class="dialog-shell">
+    <form id="questionForm" class="dialog-card">
+      <div class="dialog-header">
+        <div>
+          <p class="section-kicker">Knowledge entry</p>
+          <h2 id="questionDialogTitle">New Question</h2>
+        </div>
+        <button class="close-button" type="button" data-close="questionDialog" aria-label="Close">×</button>
+      </div>
+
+      <div class="form-grid two-column">
+        <label class="field full-span">
+          <span>Question</span>
+          <textarea id="questionField" rows="3" required placeholder="How does EGP help memory?"></textarea>
+        </label>
+        <label class="field full-span">
+          <span>Answer</span>
+          <textarea id="answerField" rows="7" required placeholder="Write the polished answer the team should use."></textarea>
+        </label>
+        <label class="field">
+          <span>Category</span>
+          <input id="categoryField" type="text" placeholder="Memory and Learning" />
+        </label>
+        <label class="field">
+          <span>Priority</span>
+          <select id="priorityField">
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </label>
+        <label class="field full-span">
+          <span>Tags</span>
+          <input id="tagsField" type="text" placeholder="working memory, parents, pilot" />
+        </label>
+        <label class="field full-span">
+          <span>Internal notes</span>
+          <textarea id="notesField" rows="3" placeholder="Private guidance for the EGP team."></textarea>
+        </label>
+      </div>
+
+      <div class="followup-editor">
+        <div class="followup-editor-header">
+          <div>
+            <span class="field-heading">Prospective follow-ups</span>
+            <p>Add questions that may come next.</p>
+          </div>
+          <button id="addFollowupBtn" class="secondary-button" type="button">
+            <img src="assets/icons/plus-svgrepo-com.svg" alt="" />
+            Add Follow-up
+          </button>
+        </div>
+        <div id="followupFields" class="followup-fields"></div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="text-button" type="button" data-close="questionDialog">Cancel</button>
+        <button id="saveQuestionBtn" class="primary-button" type="submit">Save Question</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="dialog-shell">
+    <form id="settingsForm" class="dialog-card compact-dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="section-kicker">Connection</p>
+          <h2>Google Sheets Settings</h2>
+        </div>
+        <button class="close-button" type="button" data-close="settingsDialog" aria-label="Close">×</button>
+      </div>
+
+      <p class="dialog-intro">Google Sheets is the source of truth. Every connected device reads and writes the same shared data.</p>
+
+      <label class="field">
+        <span>Apps Script web app URL</span>
+        <input id="scriptUrlField" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
+      </label>
+      <label class="field">
+        <span>Private access key</span>
+        <input id="accessKeyField" type="password" placeholder="Must match Code.gs" />
+      </label>
+      <label class="field">
+        <span>Auto-refresh</span>
+        <select id="autoRefreshField">
+          <option value="0">Off</option>
+          <option value="30">Every 30 seconds</option>
+          <option value="60">Every minute</option>
+          <option value="300">Every 5 minutes</option>
+        </select>
+      </label>
+
+      <div class="dialog-actions split-actions">
+        <button id="disconnectBtn" class="danger-text-button" type="button">Disconnect</button>
+        <div>
+          <button class="text-button" type="button" data-close="settingsDialog">Cancel</button>
+          <button class="primary-button" type="submit">Save & Connect</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="copyDialog" class="copy-dialog">
+    <div class="copy-menu">
+      <button type="button" data-copy-mode="answer">Copy answer</button>
+      <button type="button" data-copy-mode="qa">Copy question + answer</button>
+      <button type="button" data-copy-mode="thread">Copy entire thread</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
