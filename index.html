@@ -23,7 +23,9 @@
       </div>
     </div>
     <div class="top-actions">
-      <span id="syncBadge" class="sync-badge local">Local mode</span>
+      <span id="lastSynced" class="last-synced">Not synced</span>
+      <span id="syncBadge" class="sync-badge local">Setup required</span>
+      <button id="refreshBtn" class="icon-btn" aria-label="Refresh from Google Sheets">↻</button>
       <button id="settingsBtn" class="icon-btn" aria-label="Open settings">⚙</button>
     </div>
   </header>
@@ -58,6 +60,12 @@
       <article><span id="followupCount">0</span><p>Follow-ups</p></article>
       <article><span id="categoryCount">0</span><p>Categories</p></article>
       <article><span id="backupStatus">Not connected</span><p>Google Sheets</p></article>
+    </section>
+
+    <section id="loadingState" class="empty-state hidden">
+      <div class="empty-icon spin">↻</div>
+      <h3>Loading the shared vault…</h3>
+      <p>Fetching the latest questions directly from Google Sheets.</p>
     </section>
 
     <section id="emptyState" class="empty-state hidden">
@@ -130,13 +138,17 @@
         </div>
         <button type="button" class="icon-btn" id="closeSettingsBtn">✕</button>
       </div>
-      <p class="settings-copy">Paste the deployed Google Apps Script Web App URL. Every save or delete will also be backed up to your sheet.</p>
+      <p class="settings-copy">Connect the shared Google Sheet. The sheet is the source of truth: every device loads from it, and all saves, edits, and deletions update it.</p>
       <label>
         Apps Script Web App URL
         <input id="scriptUrlField" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
       </label>
+      <label>
+        Private access key
+        <input id="accessKeyField" type="password" placeholder="Enter the same key used in Code.gs" />
+      </label>
       <div class="settings-note">
-        <strong>Safe by default:</strong> The site always stores data locally first. Google Sheets is an additional backup layer.
+        <strong>Shared source:</strong> Google Sheets controls the live data. The browser keeps only a read-only emergency cache for temporary outages.
       </div>
       <div class="modal-actions">
         <button type="button" class="ghost-btn" id="disconnectBtn">Disconnect</button>
