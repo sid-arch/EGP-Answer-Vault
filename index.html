@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <title>EGP Answer Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <div class="brand-wrap">
+      <div class="brand-mark">E</div>
+      <div>
+        <p class="eyebrow">Euler's Golden Pie</p>
+        <h1>Answer Vault</h1>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="syncBadge" class="sync-badge local">Local mode</span>
+      <button id="settingsBtn" class="icon-btn" aria-label="Open settings">⚙</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero-card">
+      <div>
+        <p class="eyebrow gold">Internal knowledge system</p>
+        <h2>Turn every tough question into a polished answer.</h2>
+        <p class="hero-copy">Store parent questions, primary answers, and likely follow-ups so the whole EGP team stays consistent, sharp, and ready.</p>
+      </div>
+      <button id="newQuestionBtn" class="primary-btn">+ Add Question</button>
+    </section>
+
+    <section class="controls-card">
+      <div class="search-wrap">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Search questions, answers, tags, or follow-ups..." />
+      </div>
+      <select id="categoryFilter" aria-label="Filter by category">
+        <option value="all">All categories</option>
+      </select>
+      <select id="sortFilter" aria-label="Sort questions">
+        <option value="updated">Recently updated</option>
+        <option value="created">Recently created</option>
+        <option value="az">A–Z</option>
+      </select>
+    </section>
+
+    <section class="stats-grid">
+      <article><span id="questionCount">0</span><p>Questions</p></article>
+      <article><span id="followupCount">0</span><p>Follow-ups</p></article>
+      <article><span id="categoryCount">0</span><p>Categories</p></article>
+      <article><span id="backupStatus">Not connected</span><p>Google Sheets</p></article>
+    </section>
+
+    <section id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">✦</div>
+      <h3>No answers in the vault yet.</h3>
+      <p>Add your first question and build the EGP team's response library.</p>
+      <button class="primary-btn" id="emptyAddBtn">Add First Question</button>
+    </section>
+
+    <section id="qaGrid" class="qa-grid"></section>
+  </main>
+
+  <dialog id="questionDialog" class="modal">
+    <form id="questionForm" method="dialog" class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow gold">Knowledge entry</p>
+          <h3 id="modalTitle">Add Question</h3>
+        </div>
+        <button type="button" class="icon-btn" id="closeDialogBtn">✕</button>
+      </div>
+
+      <input type="hidden" id="entryId" />
+
+      <label>
+        Main question
+        <textarea id="questionField" rows="3" placeholder="Example: How does EGP help memory?" required></textarea>
+      </label>
+
+      <label>
+        Best answer
+        <textarea id="answerField" rows="7" placeholder="Write the polished answer your team should use..." required></textarea>
+      </label>
+
+      <div class="two-col">
+        <label>
+          Category
+          <input id="categoryField" type="text" placeholder="Memory science, Pilot study, Gameplay..." />
+        </label>
+        <label>
+          Tags
+          <input id="tagsField" type="text" placeholder="parents, working memory, visuals" />
+        </label>
+      </div>
+
+      <div class="followup-builder">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Prospective follow-ups</p>
+            <h4>Prepare for the next question before it is asked.</h4>
+          </div>
+          <button type="button" id="addFollowupBtn" class="secondary-btn">+ Add Follow-up</button>
+        </div>
+        <div id="followupFields" class="followup-fields"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="cancelBtn">Cancel</button>
+        <button type="submit" class="primary-btn">Save to Vault</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal">
+    <form id="settingsForm" method="dialog" class="modal-card settings-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow gold">Backup settings</p>
+          <h3>Google Sheets Sync</h3>
+        </div>
+        <button type="button" class="icon-btn" id="closeSettingsBtn">✕</button>
+      </div>
+      <p class="settings-copy">Paste the deployed Google Apps Script Web App URL. Every save or delete will also be backed up to your sheet.</p>
+      <label>
+        Apps Script Web App URL
+        <input id="scriptUrlField" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
+      </label>
+      <div class="settings-note">
+        <strong>Safe by default:</strong> The site always stores data locally first. Google Sheets is an additional backup layer.
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="disconnectBtn">Disconnect</button>
+        <button type="submit" class="primary-btn">Save Connection</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
