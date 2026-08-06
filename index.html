@@ -3,161 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#07111f" />
-  <title>EGP Answer Vault</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#011023" />
+  <meta name="description" content="Internal EGP question and answer knowledge hub." />
+  <title>EGP Knowledge Hub</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
+  <div class="page-glow page-glow-one"></div>
+  <div class="page-glow page-glow-two"></div>
 
-  <header class="topbar">
-    <div class="brand-wrap">
-      <div class="brand-mark">E</div>
+  <header class="app-header">
+    <div class="brand">
+      <img class="brand-logo" src="assets/logo.png" alt="EGP" onerror="this.classList.add('missing')" />
       <div>
-        <p class="eyebrow">Euler's Golden Pie</p>
-        <h1>Answer Vault</h1>
+        <p class="brand-kicker">Euler's Golden Pie</p>
+        <h1>Knowledge Hub</h1>
       </div>
     </div>
-    <div class="top-actions">
-      <span id="lastSynced" class="last-synced">Not synced</span>
-      <span id="syncBadge" class="sync-badge local">Setup required</span>
-      <button id="refreshBtn" class="icon-btn" aria-label="Refresh from Google Sheets">↻</button>
-      <button id="settingsBtn" class="icon-btn" aria-label="Open settings">⚙</button>
+
+    <div class="header-actions">
+      <div id="syncStatus" class="sync-status setup" role="status" aria-live="polite">
+        <span class="sync-dot"></span>
+        <span id="syncStatusText">Setup required</span>
+      </div>
+      <button id="refreshBtn" class="icon-button" type="button" aria-label="Refresh from Google Sheets" title="Refresh">
+        <img src="assets/icons/refresh-cw-alt-3-svgrepo-com.svg" alt="" />
+      </button>
+      <button id="settingsBtn" class="icon-button" type="button" aria-label="Open settings" title="Settings">
+        <img src="assets/icons/settings-minimalistic-svgrepo-com.svg" alt="" />
+      </button>
     </div>
   </header>
 
-  <main class="shell">
-    <section class="hero-card">
+  <main class="app-shell">
+    <section class="hero-panel">
       <div>
-        <p class="eyebrow gold">Internal knowledge system</p>
-        <h2>Turn every tough question into a polished answer.</h2>
-        <p class="hero-copy">Store parent questions, primary answers, and likely follow-ups so the whole EGP team stays consistent, sharp, and ready.</p>
+        <p class="section-kicker">Internal EGP reference system</p>
+        <h2>Every tough question. One polished answer.</h2>
+        <p>Build a shared library of questions, answers, and likely follow-ups so the entire EGP team stays consistent and ready.</p>
       </div>
-      <button id="newQuestionBtn" class="primary-btn">+ Add Question</button>
+      <button id="newQuestionBtn" class="primary-button" type="button">
+        <img src="assets/icons/plus-svgrepo-com.svg" alt="" />
+        <span>New Question</span>
+      </button>
     </section>
 
-    <section class="controls-card">
-      <div class="search-wrap">
-        <span>⌕</span>
-        <input id="searchInput" type="search" placeholder="Search questions, answers, tags, or follow-ups..." />
-      </div>
+    <section class="toolbar" aria-label="Knowledge hub controls">
+      <label class="search-box">
+        <img src="assets/icons/search-svgrepo-com.svg" alt="" />
+        <input id="searchInput" type="search" placeholder="Search questions, answers, or follow-ups..." autocomplete="off" />
+      </label>
       <select id="categoryFilter" aria-label="Filter by category">
         <option value="all">All categories</option>
       </select>
-      <select id="sortFilter" aria-label="Sort questions">
-        <option value="updated">Recently updated</option>
-        <option value="created">Recently created</option>
-        <option value="az">A–Z</option>
-      </select>
     </section>
 
-    <section class="stats-grid">
-      <article><span id="questionCount">0</span><p>Questions</p></article>
-      <article><span id="followupCount">0</span><p>Follow-ups</p></article>
-      <article><span id="categoryCount">0</span><p>Categories</p></article>
-      <article><span id="backupStatus">Not connected</span><p>Google Sheets</p></article>
+    <section class="summary-row" aria-label="Vault summary">
+      <div><strong id="questionCount">0</strong><span>Questions</span></div>
+      <div><strong id="followupCount">0</strong><span>Follow-ups</span></div>
+      <div><strong id="lastSyncedText">Never</strong><span>Last synced</span></div>
     </section>
 
-    <section id="loadingState" class="empty-state hidden">
-      <div class="empty-icon spin">↻</div>
-      <h3>Loading the shared vault…</h3>
-      <p>Fetching the latest questions directly from Google Sheets.</p>
+    <section id="loadingState" class="state-card hidden">
+      <div class="spinner"></div>
+      <h3>Loading the shared vault</h3>
+      <p>Fetching the latest information from Google Sheets.</p>
     </section>
 
-    <section id="emptyState" class="empty-state hidden">
-      <div class="empty-icon">✦</div>
-      <h3>No answers in the vault yet.</h3>
-      <p>Add your first question and build the EGP team's response library.</p>
-      <button class="primary-btn" id="emptyAddBtn">Add First Question</button>
+    <section id="emptyState" class="state-card hidden">
+      <div class="empty-symbol">?</div>
+      <h3>No questions found</h3>
+      <p>Add the first question, or adjust your search.</p>
     </section>
 
-    <section id="qaGrid" class="qa-grid"></section>
+    <section id="questionList" class="question-list" aria-live="polite"></section>
   </main>
 
-  <dialog id="questionDialog" class="modal">
-    <form id="questionForm" method="dialog" class="modal-card">
-      <div class="modal-head">
+  <dialog id="questionDialog" class="dialog-shell">
+    <form id="questionForm" class="dialog-card">
+      <div class="dialog-header">
         <div>
-          <p class="eyebrow gold">Knowledge entry</p>
-          <h3 id="modalTitle">Add Question</h3>
+          <p class="section-kicker">Knowledge entry</p>
+          <h3 id="questionDialogTitle">New Question</h3>
         </div>
-        <button type="button" class="icon-btn" id="closeDialogBtn">✕</button>
+        <button class="close-button" type="button" data-close="questionDialog" aria-label="Close">×</button>
       </div>
 
-      <input type="hidden" id="entryId" />
+      <input id="entryId" type="hidden" />
 
-      <label>
-        Main question
-        <textarea id="questionField" rows="3" placeholder="Example: How does EGP help memory?" required></textarea>
+      <label class="field">
+        <span>Question</span>
+        <textarea id="questionField" rows="3" required placeholder="How does EGP help memory?"></textarea>
       </label>
 
-      <label>
-        Best answer
-        <textarea id="answerField" rows="7" placeholder="Write the polished answer your team should use..." required></textarea>
+      <label class="field">
+        <span>Answer</span>
+        <textarea id="answerField" rows="8" required placeholder="Write the polished answer the team should use."></textarea>
       </label>
 
-      <div class="two-col">
-        <label>
-          Category
-          <input id="categoryField" type="text" placeholder="Memory science, Pilot study, Gameplay..." />
-        </label>
-        <label>
-          Tags
-          <input id="tagsField" type="text" placeholder="parents, working memory, visuals" />
-        </label>
-      </div>
+      <label class="field">
+        <span>Category</span>
+        <input id="categoryField" type="text" placeholder="Memory, Research, Gameplay..." />
+      </label>
 
-      <div class="followup-builder">
-        <div class="section-title-row">
+      <div class="followup-editor">
+        <div class="followup-editor-header">
           <div>
-            <p class="eyebrow">Prospective follow-ups</p>
-            <h4>Prepare for the next question before it is asked.</h4>
+            <span class="field-heading">Prospective follow-ups</span>
+            <p>Add the questions that may come next.</p>
           </div>
-          <button type="button" id="addFollowupBtn" class="secondary-btn">+ Add Follow-up</button>
+          <button id="addFollowupBtn" class="secondary-button" type="button">
+            <img src="assets/icons/plus-svgrepo-com.svg" alt="" />
+            Add Follow-up
+          </button>
         </div>
         <div id="followupFields" class="followup-fields"></div>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="ghost-btn" id="cancelBtn">Cancel</button>
-        <button type="submit" class="primary-btn">Save to Vault</button>
+      <div class="dialog-actions">
+        <button class="text-button" type="button" data-close="questionDialog">Cancel</button>
+        <button id="saveQuestionBtn" class="primary-button" type="submit">Save Question</button>
       </div>
     </form>
   </dialog>
 
-  <dialog id="settingsDialog" class="modal">
-    <form id="settingsForm" method="dialog" class="modal-card settings-card">
-      <div class="modal-head">
+  <dialog id="settingsDialog" class="dialog-shell">
+    <form id="settingsForm" class="dialog-card compact-dialog">
+      <div class="dialog-header">
         <div>
-          <p class="eyebrow gold">Backup settings</p>
-          <h3>Google Sheets Sync</h3>
+          <p class="section-kicker">Connection</p>
+          <h3>Google Sheets Settings</h3>
         </div>
-        <button type="button" class="icon-btn" id="closeSettingsBtn">✕</button>
+        <button class="close-button" type="button" data-close="settingsDialog" aria-label="Close">×</button>
       </div>
-      <p class="settings-copy">Connect the shared Google Sheet. The sheet is the source of truth: every device loads from it, and all saves, edits, and deletions update it.</p>
-      <label>
-        Apps Script Web App URL
+
+      <p class="dialog-intro">Google Sheets is the source of truth. Every device reads and writes the same shared data.</p>
+
+      <label class="field">
+        <span>Apps Script web app URL</span>
         <input id="scriptUrlField" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
       </label>
-      <label>
-        Private access key
-        <input id="accessKeyField" type="password" placeholder="Enter the same key used in Code.gs" />
+
+      <label class="field">
+        <span>Private access key</span>
+        <input id="accessKeyField" type="password" placeholder="Must match Code.gs" />
       </label>
-      <div class="settings-note">
-        <strong>Shared source:</strong> Google Sheets controls the live data. The browser keeps only a read-only emergency cache for temporary outages.
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="ghost-btn" id="disconnectBtn">Disconnect</button>
-        <button type="submit" class="primary-btn">Save Connection</button>
+
+      <div class="dialog-actions split-actions">
+        <button id="disconnectBtn" class="danger-text-button" type="button">Disconnect</button>
+        <div>
+          <button class="text-button" type="button" data-close="settingsDialog">Cancel</button>
+          <button class="primary-button" type="submit">Save & Connect</button>
+        </div>
       </div>
     </form>
   </dialog>
 
-  <div id="toast" class="toast"></div>
+  <dialog id="copyDialog" class="copy-dialog">
+    <div class="copy-menu">
+      <button type="button" data-copy-mode="answer">Copy answer</button>
+      <button type="button" data-copy-mode="qa">Copy question + answer</button>
+      <button type="button" data-copy-mode="thread">Copy entire thread</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
